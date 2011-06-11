@@ -233,6 +233,31 @@ vows.describe("Cradle").addBatch({
                 },
                 "and saves successfully": status(201)
             }
+        },
+        "get()": {
+            topic: function (db) {
+                var that = this;
+                db.get('foo', function (e, res) {
+                    that.callback(null, db);
+                });
+            },
+            "should write the to the cache even if the document was not found": function (db) {
+                assert.ok(db.cache.has('foo'));
+                assert.ok(db.cache.get('foo').error);
+                assert.equal(db.cache.get('foo').error, 'not_found');
+            },
+            "and": {
+                topic: function (db) {
+                    var that = this;
+                    db.get('foo', function (e, res) {
+                        that.callback(null, e);
+                    });
+                },
+                "return the error from cache": function (e) {
+                    assert.ok(e);
+                    assert.equal(e.error, 'not_found');
+                }
+            }
         }
     },
     "Connection": {
